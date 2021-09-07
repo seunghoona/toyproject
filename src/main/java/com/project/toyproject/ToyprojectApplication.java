@@ -9,25 +9,26 @@ import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Optional;
 import java.util.UUID;
 
 @SpringBootApplication
 @EnableJpaAuditing
-@RequiredArgsConstructor
 public class ToyprojectApplication {
 
-    private final EntityManager entityManager;
 
     public static void main(String[] args) {
         SpringApplication.run(ToyprojectApplication.class, args);
     }
 
-
     @Bean
     public AuditorAware<String> auditorProvider(){
         return () -> Optional.of(UUID.randomUUID().toString());
     }
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Bean
     public JPAQueryFactory jpaQueryFactory(){
