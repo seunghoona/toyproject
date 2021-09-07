@@ -2,9 +2,12 @@ package com.project.toyproject.board.domain;
 
 import com.project.toyproject.common.domain.CreateModifyEntity;
 import lombok.*;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
+
+import java.util.Objects;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
@@ -13,6 +16,7 @@ import static javax.persistence.GenerationType.SEQUENCE;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Builder
+@ToString(exclude = {"createBy","lastModifiedBy","createDate"})
 public class BoardCreate extends CreateModifyEntity{
 
     @Id
@@ -26,12 +30,10 @@ public class BoardCreate extends CreateModifyEntity{
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private BoardStatus boardStatus = BoardStatus.STAND_BY;
+    private BoardStatus boardStatus = BoardStatus.EMPTY;
 
     @Column(length = 255)
     private String description;
-
-
 
 
 }

@@ -17,6 +17,8 @@ import java.util.UUID;
 @EnableJpaAuditing
 public class ToyprojectApplication {
 
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public static void main(String[] args) {
         SpringApplication.run(ToyprojectApplication.class, args);
@@ -27,5 +29,8 @@ public class ToyprojectApplication {
         return () -> Optional.of(UUID.randomUUID().toString());
     }
 
-
+    @Bean
+    public JPAQueryFactory jpaQueryFactory(){
+        return new JPAQueryFactory(entityManager);
+    }
 }

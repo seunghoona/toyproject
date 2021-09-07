@@ -1,10 +1,12 @@
 
 spring:
   datasource:
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-    url: jdbc:h2:~/test
+    hikari:
+#      driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+      username: admin
+      password:
+      jdbc-url: jdbc:h2:tcp://localhost/~/test
+      driver-class-name: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     database: h2
@@ -17,9 +19,9 @@ spring:
         format_sql: true
         show-sql: true
         use_sql_comments: true
+        default_batch_fetch_size : 100
 
-
-  #      naming-strategy: org.hibernate.cfg.EJB3NamingStrategy
+#      naming-strategy: org.hibernate.cfg.EJB3NamingStrategy
 #    properties:
 #      hibernate.cache.use_second_level_cache: true
 #      hibernate.cache.use_query_cache: false
@@ -32,8 +34,10 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
   ## file: %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
   level:
+    p6psy: INFO
     root: ERROR
-    org.springframework.web: INFO
-    com.howtodoinjava: DEBUG
-    org.hibernate: ERROR
-    org.hibernate.SQL: debug
+    org.springframework.web: ERROR
+    com.project.toyproject : INFO
+    org.hibernate    : ERROR
+    org.hibernate.SQL: ERROR
+

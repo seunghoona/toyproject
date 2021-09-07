@@ -1,4 +1,4 @@
-package com.project.toyproject.config;
+package com.project.toyproject.common.domain;
 
 
 import com.p6spy.engine.logging.Category;
@@ -9,7 +9,6 @@ import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Stack;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import static java.util.Arrays.stream;
@@ -86,15 +85,13 @@ public class P6spyPrettySqlFormatter implements MessageFormattingStrategy {
         stream(new Throwable().getStackTrace())
                 .map(StackTraceElement::toString)
                 .filter(isExcludeWords())
-                .map(callStack::push);
+                .forEach(callStack::push);
 
+        int order = 1;
         final StringBuilder callStackBuilder = new StringBuilder();
-
-        if(!callStack.empty()) return callStackBuilder;
-
-        AtomicInteger order = new AtomicInteger(1);
-        callStack.stream().map(s -> callStackBuilder.append(MessageFormat.format("{0}\t\t{1}. {2}", NEW_LINE, order.getAndIncrement(), callStack.pop())));
-
+        while (!callStack.empty()) {
+            callStackBuilder.append(MessageFormat.format("{0}\t\t{1}. {2}", NEW_LINE, order++, callStack.pop()));
+        }
         return callStackBuilder;
     }
 
