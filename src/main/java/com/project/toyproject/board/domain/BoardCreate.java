@@ -1,21 +1,22 @@
 package com.project.toyproject.board.domain;
 
+import com.project.toyproject.common.domain.CreateModifyEntity;
 import lombok.*;
-import org.hibernate.annotations.Any;
-import org.hibernate.annotations.ManyToAny;
+import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+
+import static javax.persistence.GenerationType.SEQUENCE;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class BoardCreate {
+@Builder
+public class BoardCreate extends CreateModifyEntity{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = SEQUENCE)
     @Column(name = "board_create_id")
     private Long id ;
 
@@ -30,12 +31,7 @@ public class BoardCreate {
     @Column(length = 255)
     private String description;
 
-    @ManyToAny(
-            metaDef = "OptionsInteface",
-            metaColumn = @Column(name = "options_kind"),
-            fetch = FetchType.LAZY
-    )
-    private List<OptionsInteface> options = new ArrayList<>();
+
 
 
 }

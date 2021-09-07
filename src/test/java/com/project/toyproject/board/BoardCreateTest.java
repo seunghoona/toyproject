@@ -27,10 +27,8 @@ class BoardCreateTest {
                 .id(1L)
                 .boardName("공지사항")
                 .description("공지사항을 만드는 게시판입니다.")
-                .options(List.of(Option))
                 .build();
 
         boardRepository.save(createNoticeBoard);
-
     }
 }

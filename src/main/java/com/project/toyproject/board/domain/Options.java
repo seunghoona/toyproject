@@ -16,6 +16,5 @@ public class Options {
     @Embedded
     private OptionDate optionDate;
 
-    private BoardCreate boardCreate;
 
 }

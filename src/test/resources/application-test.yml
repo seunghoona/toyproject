@@ -1,41 +1,20 @@
-
 spring:
-  datasource:
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-    url: jdbc:h2:~/test
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    database: h2
-    generate-ddl: false # 시작할 때 스키마를 초기화합니다.
-    open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
-        show-sql: true
-  test:
-    database:
-      replace: none
-
-
-  #      naming-strategy: org.hibernate.cfg.EJB3NamingStrategy
-#    properties:
-#      hibernate.cache.use_second_level_cache: true
-#      hibernate.cache.use_query_cache: false
-#      hibernate.generate_statistics: true
-
-
+        use_sql_comments: true
 
 logging:
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    console: "[test]]%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
   ## file: %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
   level:
     root: ERROR
-    org.springframework.web: INFO
+    org.springframework.web: ERROR
     com.howtodoinjava: DEBUG
     org.hibernate: ERROR
-    org.hibernate.SQL: debug
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
