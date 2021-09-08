@@ -3,9 +3,9 @@ spring:
   datasource:
     hikari:
 #      driver-class-name: com.p6spy.engine.spy.P6SpyDriver
-      username: admin
+      username: sa
       password:
-      jdbc-url: jdbc:h2:tcp://localhost/~/test
+      jdbc-url: jdbc:h2:~/test
       driver-class-name: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
@@ -20,6 +20,8 @@ spring:
         show-sql: true
         use_sql_comments: true
         default_batch_fetch_size : 100
+  main:
+    allow-bean-definition-overriding: true
 
 #      naming-strategy: org.hibernate.cfg.EJB3NamingStrategy
 #    properties:
