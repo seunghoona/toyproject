@@ -22,5 +22,6 @@ public class OptionUpload extends Options {
         super(id, boardCreate);
         this.file = file;
     }
+
 }
 

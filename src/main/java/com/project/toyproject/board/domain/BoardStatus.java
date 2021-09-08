@@ -5,5 +5,5 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public enum BoardStatus {
-    EMPTY,STAND_BY, USE, PAUSE, STOP;
+    EMPTY, STAND_BY, USE, PAUSE, STOP;
 }

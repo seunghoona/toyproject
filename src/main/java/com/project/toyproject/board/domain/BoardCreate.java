@@ -7,10 +7,7 @@ import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static javax.persistence.GenerationType.IDENTITY;
 import static javax.persistence.GenerationType.SEQUENCE;
@@ -19,7 +16,7 @@ import static javax.persistence.GenerationType.SEQUENCE;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Builder
+
 @ToString(exclude = {"createBy","lastModifiedBy","createDate"})
 public class BoardCreate extends CreateModifyEntity{
 
@@ -39,8 +36,26 @@ public class BoardCreate extends CreateModifyEntity{
     @Column(length = 255)
     private String description;
 
-    @OneToMany(mappedBy = "boardCreate")
-    private Set<Options> options = new HashSet<>();
+    @OneToMany(mappedBy = "boardCreate",cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Options> options = new ArrayList<>();
 
+    @Builder
+    public BoardCreate(Long id, String boardName, BoardStatus boardStatus, String description) {
+        this.id = id;
+        this.boardName = boardName;
+        this.boardStatus = boardStatus;
+        this.description = description;
+    }
+
+    public static class BoardCreateBuilder{
+        public BoardCreateBuilder addOption(Options option) {
+
+            BoardCreate.options.add(option);
+            option.setBoardCreate();
+            return this;
+        }
+
+    }
 
 }
