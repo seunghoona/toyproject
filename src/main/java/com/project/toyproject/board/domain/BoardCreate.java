@@ -7,8 +7,12 @@ import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
+import static javax.persistence.GenerationType.IDENTITY;
 import static javax.persistence.GenerationType.SEQUENCE;
 
 @Entity
@@ -20,7 +24,7 @@ import static javax.persistence.GenerationType.SEQUENCE;
 public class BoardCreate extends CreateModifyEntity{
 
     @Id
-    @GeneratedValue(strategy = SEQUENCE)
+    @GeneratedValue(strategy = IDENTITY)
     @Column(name = "board_create_id")
     private Long id ;
 
@@ -34,6 +38,9 @@ public class BoardCreate extends CreateModifyEntity{
 
     @Column(length = 255)
     private String description;
+
+    @OneToMany(mappedBy = "boardCreate")
+    private Set<Options> options = new HashSet<>();
 
 
 }

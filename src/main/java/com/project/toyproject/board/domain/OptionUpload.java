@@ -1,14 +1,26 @@
 package com.project.toyproject.board.domain;
 
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
-@Embeddable
-public class OptionUpload implements  OptionsInteface{
+import static lombok.AccessLevel.PROTECTED;
 
-    @EmbeddedId
-    private BoardCreateId id;
+
+@Entity
+@DiscriminatorValue("O_UPLOAD")
+@NoArgsConstructor(access = PROTECTED)
+public class OptionUpload extends Options {
 
     @Embedded
     private File file;
 
+    @Builder
+    public OptionUpload(Long id, BoardCreate boardCreate, File file) {
+        super(id, boardCreate);
+        this.file = file;
+    }
 }
+
