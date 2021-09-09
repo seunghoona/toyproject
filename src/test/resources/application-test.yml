@@ -13,8 +13,8 @@ logging:
     console: "[test] %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
   ## file: %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
   level:
-    root: ERROR
-    org.springframework.web: ERROR
+    root: DEBUG
+    org.springframework.web: DEBUG
     com.howtodoinjava: DEBUG
     org.hibernate: ERROR
     org.hibernate.SQL: DEBUG

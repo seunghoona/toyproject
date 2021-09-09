@@ -2,28 +2,24 @@ package com.project.toyproject.board.domain;
 
 import com.project.toyproject.common.domain.CreateModifyEntity;
 import lombok.*;
-import org.hibernate.Hibernate;
-import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
-
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
-import static javax.persistence.GenerationType.SEQUENCE;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-
-@ToString(exclude = {"createBy","lastModifiedBy","createDate"})
-public class BoardCreate extends CreateModifyEntity{
+@Builder
+public class BoardCreate extends CreateModifyEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "board_create_id")
-    private Long id ;
+    private Long id;
 
     @Column(name = "board_name", length = 50)
     private String boardName;
@@ -36,26 +32,40 @@ public class BoardCreate extends CreateModifyEntity{
     @Column(length = 255)
     private String description;
 
-    @OneToMany(mappedBy = "boardCreate",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "boardCreate", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<Options> options = new ArrayList<>();
+    private Set<Options> options = new HashSet<>();
 
-    @Builder
-    public BoardCreate(Long id, String boardName, BoardStatus boardStatus, String description) {
-        this.id = id;
-        this.boardName = boardName;
-        this.boardStatus = boardStatus;
-        this.description = description;
+
+
+    public void addOption(Set<Options> options) {
+        this.options = options;
+        options.stream().forEach(s -> s.setBoardCreate(this));
     }
 
-    public static class BoardCreateBuilder{
-        public BoardCreateBuilder addOption(Options option) {
+    public void addOption(Options options) {
+        this.options = Set.of(options);
+        options.setBoardCreate(this);
+    }
 
-            BoardCreate.options.add(option);
-            option.setBoardCreate();
-            return this;
+ /*   public static BoardCreate.BoardCreateBuilder builders(){
+        return new BoardCreate.BoardCreateBuilder(this);
+    }
+
+
+    static class BoardCreateBuilder {
+        private Set<Options> options = new HashSet<>();
+        public BoardCreateBuilder(){
+            options.add
+
         }
 
-    }
+        public BoardCreate.BoardCreateBuilder getTest(Set<Option>){
+            this.options
+
+            return this;
+        }
+    }*/
+
 
 }

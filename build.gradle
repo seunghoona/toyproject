@@ -1,4 +1,4 @@
-//querydsl 추가
+//querydsl 추가 https://kangwoojin.github.io/programing/query-dsl-setting/
 buildscript {
     dependencies {
         classpath("gradle.plugin.com.ewerk.gradle.plugins:querydsl-plugin:1.0.10")
@@ -45,11 +45,12 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
-    implementation group: 'com.querydsl', name: 'querydsl-jpa' // Query DSL 추가
-    implementation group: 'com.querydsl', name: 'querydsl-apt' // Query DSL 추가
+    implementation("com.querydsl:querydsl-jpa") // querydsl
+    implementation("com.querydsl:querydsl-apt") // querydsl
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 }
+
 
 test {
     outputs.dir snippetsDir
@@ -77,7 +78,6 @@ sourceSets {
     }
 }
 
-
 configurations {
     querydsl.extendsFrom compileClasspath
 }
@@ -85,5 +85,10 @@ configurations {
 compileQuerydsl{
     options.annotationProcessorPath = configurations.querydsl
 }
-
-
+project.afterEvaluate {
+    project.tasks.compileQuerydsl.options.compilerArgs = [
+            "-proc:only",
+            "-processor", project.querydsl.processors() +
+                    ',lombok.launch.AnnotationProcessorHider$AnnotationProcessor'
+    ]
+}
