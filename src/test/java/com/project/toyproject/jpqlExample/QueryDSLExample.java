@@ -1,8 +1,6 @@
 package com.project.toyproject.jpqlExample;
 
-import com.project.toyproject.board.domain.BoardCreate;
-import com.project.toyproject.board.domain.QBoardCreate;
-import com.project.toyproject.board.domain.QOptions;
+import com.project.toyproject.board.domain.*;
 import com.project.toyproject.config.CustomDataJpaTest;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
@@ -11,16 +9,20 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.Set;
 
 import static com.project.toyproject.board.domain.QBoardCreate.boardCreate;
+import static com.project.toyproject.board.domain.QOptionUpload.optionUpload;
 import static com.project.toyproject.board.domain.QOptions.options;
 
 
 @CustomDataJpaTest
+@Rollback(value = false)
 public class QueryDSLExample {
 
     @Autowired
@@ -83,9 +85,9 @@ public class QueryDSLExample {
         boardCreates.stream().forEach(System.out::println);
     }
 
-    
+
     @Test
-    public void pagin1() throws Exception{
+    public void pagin1() throws Exception {
         entityManager.persist(BoardCreate.builder()
                 .boardName(null)
                 .description("사진게시판을 생성합니다.")
@@ -101,7 +103,7 @@ public class QueryDSLExample {
     }
 
     @Test
-    public void aggregate() throws Exception{
+    public void aggregate() throws Exception {
         entityManager.persist(BoardCreate.builder()
                 .boardName(null)
                 .description("사진게시판을 생성합니다.")
@@ -122,12 +124,86 @@ public class QueryDSLExample {
 
 
     @Test
-    public void groupby() throws Exception{
-        List<BoardCreate> fetch = queryFactory
-                .selectFrom(boardCreate)
-                .leftJoin(options)
+
+    public void groupby() throws Exception {
+        List<BoardStatus> fetch1 = queryFactory
+                .select(boardCreate.boardStatus)
+                .from(boardCreate)
+                .leftJoin(boardCreate.options, options)
                 .groupBy(boardCreate.boardStatus)
                 .fetch();
+
+        System.out.println("fetch1 = " + fetch1);
     }
 
+
+    @Test
+    public void join() throws Exception {
+        //given
+        List<Tuple> fetch = queryFactory
+                .select(boardCreate, optionUpload)
+                .from(boardCreate)
+                .join(boardCreate.options, optionUpload._super)
+                .where(optionUpload._super.id.eq(14L)).fetch();
+        //when
+        fetch.stream().forEach(System.out::println);
+        //then
+    }
+
+
+    @Test
+    public void theta_join() throws Exception {
+        BoardCreate movieboard = BoardCreate.builder()
+                .boardName("동영상게시판")
+                .description("공지사항을 만드는 게시판입니다.")
+                .build();
+        BoardCreate imgBoard = BoardCreate.builder()
+                .boardName("이미지게시판")
+                .description("공지사항을 만드는 게시판입니다.")
+                .build();
+
+        entityManager.persist(imgBoard);
+        entityManager.persist(movieboard);
+
+        List<BoardCreate> fetch = queryFactory
+                .selectFrom(boardCreate)
+                .from(boardCreate, options)
+                .where(boardCreate.boardName.like("동영상게시판%")
+                        .and(boardCreate.boardName.like("이미지게시판%"))
+                )
+                .fetch();
+
+        Assertions.assertThat(fetch)
+                .extracting("boardName")
+                .containsExactly("동영상게시판", "이미지게시판");
+    }
+
+
+    @Test
+    public void joinOn() throws Exception {
+        BoardCreate movieboard = BoardCreate.builder()
+                .boardName("동영상게시판")
+                .description("공지사항을 만드는 게시판입니다.")
+                .build();
+        BoardCreate imgBoard = BoardCreate.builder()
+                .boardName("이미지게시판")
+                .description("공지사항을 만드는 게시판입니다.")
+                .build();
+        movieboard.addOption(OptionUpload.builder()
+                .file(File.builder()
+                        .min(10L)
+                        .max(20L)
+                        .limit(30L)
+                        .build())
+                .build());
+        entityManager.persist(imgBoard);
+        entityManager.persist(movieboard);
+
+        List<Tuple> list = queryFactory.
+                select(boardCreate, optionUpload)
+                .from(boardCreate)
+                .leftJoin(boardCreate.options, optionUpload._super)
+                .on(boardCreate.boardName.eq("동영상게시판")).fetch();
+
+    }
 }

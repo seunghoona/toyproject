@@ -2,6 +2,7 @@ package com.project.toyproject.board.domain;
 
 import com.project.toyproject.common.domain.CreateModifyEntity;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -10,7 +11,6 @@ import java.util.Set;
 import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Builder
@@ -36,36 +36,24 @@ public class BoardCreate extends CreateModifyEntity {
     @Builder.Default
     private Set<Options> options = new HashSet<>();
 
-
+    @Builder
+    public BoardCreate(Long id, String boardName, BoardStatus boardStatus, String description, Set<Options> options) {
+        this.id = id;
+        this.boardName = boardName;
+        this.boardStatus = boardStatus;
+        this.description = description;
+        this.options = options;
+    }
 
     public void addOption(Set<Options> options) {
         this.options = options;
-        options.stream().forEach(s -> s.setBoardCreate(this));
+        options.stream().forEach(s->s.setBoardCreate(this));
     }
 
     public void addOption(Options options) {
-        this.options = Set.of(options);
+        this.options.add(options);
         options.setBoardCreate(this);
     }
-
- /*   public static BoardCreate.BoardCreateBuilder builders(){
-        return new BoardCreate.BoardCreateBuilder(this);
-    }
-
-
-    static class BoardCreateBuilder {
-        private Set<Options> options = new HashSet<>();
-        public BoardCreateBuilder(){
-            options.add
-
-        }
-
-        public BoardCreate.BoardCreateBuilder getTest(Set<Option>){
-            this.options
-
-            return this;
-        }
-    }*/
 
 
 }

@@ -30,6 +30,4 @@ public class Options {
     @Setter
     private BoardCreate boardCreate;
 
-
-
 }

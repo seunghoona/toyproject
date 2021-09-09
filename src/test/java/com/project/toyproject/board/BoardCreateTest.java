@@ -47,14 +47,36 @@ class BoardCreateTest {
                 )
                 .build();
 
+        //날짜 옵션
+        OptionDefault optionDefault2 = OptionDefault.builder()
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDate.of(2021, 12, 31).atTime(0, 0))
+                .build();
+        //파일 옵션
+        OptionUpload test2 = OptionUpload.builder()
+                .file(
+                        File.builder()
+                                .min(1000L)
+                                .max(1000000L)
+                                .limit(10L)
+                                .build()
+                )
+                .build();
+
         BoardCreate notice = BoardCreate.builder()
                 .boardName("공지사항")
                 .description("공지사항을 만드는 게시판입니다.")
                 .build();
         notice.addOption(optionDefault);
-        notice.addOption(test);
 
-        boardRepository.save(notice);
+
+        BoardCreate free = BoardCreate.builder()
+                .boardName("자유게시판")
+                .description("공지사항을 만드는 게시판입니다.")
+                .build();
+        free.addOption(optionDefault2);
+
+        boardRepository.saveAll(Set.of(notice,free));
 
     }
 }
