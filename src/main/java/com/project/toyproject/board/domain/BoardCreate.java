@@ -14,6 +14,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Builder
+@AllArgsConstructor
 public class BoardCreate extends CreateModifyEntity {
 
     @Id
@@ -37,13 +38,15 @@ public class BoardCreate extends CreateModifyEntity {
     private Set<Options> options = new HashSet<>();
 
     @Builder
-    public BoardCreate(Long id, String boardName, BoardStatus boardStatus, String description, Set<Options> options) {
+    public BoardCreate(Long id, String boardName, BoardStatus boardStatus, String description) {
         this.id = id;
         this.boardName = boardName;
         this.boardStatus = boardStatus;
         this.description = description;
-        this.options = options;
     }
+
+
+
 
     public void addOption(Set<Options> options) {
         this.options = options;

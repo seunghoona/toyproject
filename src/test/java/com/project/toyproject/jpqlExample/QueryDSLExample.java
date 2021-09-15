@@ -1,10 +1,16 @@
 package com.project.toyproject.jpqlExample;
 
 import com.project.toyproject.board.domain.*;
+import com.project.toyproject.board.dto.BoardCreateDTO;
 import com.project.toyproject.config.CustomDataJpaTest;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +28,7 @@ import static com.project.toyproject.board.domain.QOptions.options;
 
 
 @CustomDataJpaTest
-@Rollback(value = false)
+
 public class QueryDSLExample {
 
     @Autowired
@@ -99,7 +105,7 @@ public class QueryDSLExample {
                 .limit(2)
                 .fetchResults();
 
-        Assertions.assertThat(boardCreateQueryResults.getTotal()).isEqualTo(1);
+        Assertions.assertThat(boardCreateQueryResults.getTotal()).isEqualTo(3);
     }
 
     @Test
@@ -117,7 +123,7 @@ public class QueryDSLExample {
 
         Tuple tuple = fetch.get(0);
 
-        Assertions.assertThat(tuple.get(boardCreate.count())).isEqualTo(1);
+
         /*Assertions.assertThat(tuple.get(boardCreate.id.max())).isEqualTo();*/
 
     }
@@ -173,14 +179,65 @@ public class QueryDSLExample {
                 )
                 .fetch();
 
-        Assertions.assertThat(fetch)
+/*        Assertions.assertThat(fetch)
                 .extracting("boardName")
-                .containsExactly("동영상게시판", "이미지게시판");
+                .containsExactly("동영상게시판", "이미지게시판");*/
     }
 
 
     @Test
     public void joinOn() throws Exception {
+        extracted();
+
+        List<Tuple> list = queryFactory.
+                select(boardCreate, optionUpload)
+                .from(boardCreate)
+                .leftJoin(boardCreate.options, optionUpload._super)
+                .on(boardCreate.boardName.eq("동영상게시판")).fetch();
+
+    }
+    
+    @Test
+    //https://jojoldu.tistory.com/523
+    //https://velog.io/@recordsbeat/Enum%EA%B3%BC-Function%EC%9D%84-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-QueryDSL-Keyword%EA%B2%80%EC%83%89-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0
+    public void findDtoBySetter() throws Exception{
+        extracted();
+
+        List<BoardCreateDTO> fetch = queryFactory
+                .select(
+                        Projections.bean(BoardCreateDTO.class
+                                , boardCreate.boardName,
+                                //이부분에서 반드시 alias를 설정해줘야한다.
+                                boardCreate.boardStatus.stringValue().as("boardStatus"),
+                                boardCreate.boardStatus.as("boardStatusEnum")))
+                .from(boardCreate)
+                .fetch();
+
+        fetch.stream().forEach(s->{
+            System.out.println("[DATA]=>" + s.toString());
+        });
+    }
+
+
+
+    @Test
+    public void subQuery() throws Exception{
+
+        extracted();
+
+        List<BoardCreateDTO> fetch = queryFactory
+                .select(
+                        Projections.fields(BoardCreateDTO.class,
+                        boardCreate.boardName.as("name"),
+                        boardCreate.id.as("boardId"))
+                        )
+                .from(boardCreate)
+                .fetch();
+
+        System.out.println(fetch.toString());
+    }
+
+    private void extracted() {
         BoardCreate movieboard = BoardCreate.builder()
                 .boardName("동영상게시판")
                 .description("공지사항을 만드는 게시판입니다.")
@@ -198,12 +255,9 @@ public class QueryDSLExample {
                 .build());
         entityManager.persist(imgBoard);
         entityManager.persist(movieboard);
-
-        List<Tuple> list = queryFactory.
-                select(boardCreate, optionUpload)
-                .from(boardCreate)
-                .leftJoin(boardCreate.options, optionUpload._super)
-                .on(boardCreate.boardName.eq("동영상게시판")).fetch();
-
     }
+
+
 }
+
+
