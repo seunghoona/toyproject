@@ -15,7 +15,7 @@ import java.lang.annotation.*;
 @Inherited
 @DataJpaTest(showSql = false)
 @ImportAutoConfiguration(DataSourceDecoratorAutoConfiguration.class)
-@Import(value = {TestConfig.class,P6spyConfig.class})
+@Import(value = {TestConfig.class})
 /*@Import(value = {TestConfig.class})*/
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)

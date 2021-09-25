@@ -17,7 +17,7 @@ logging:
     org.springframework.web: DEBUG
     com.howtodoinjava: DEBUG
     org.hibernate: ERROR
-    org.hibernate.SQL: DEBUG
+    org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: TRACE
 
 

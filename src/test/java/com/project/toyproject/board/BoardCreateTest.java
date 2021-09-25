@@ -1,6 +1,9 @@
 package com.project.toyproject.board;
 
-import com.project.toyproject.board.domain.*;
+import com.project.toyproject.board.domain.BoardCreate;
+import com.project.toyproject.board.domain.File;
+import com.project.toyproject.board.domain.OptionDefault;
+import com.project.toyproject.board.domain.OptionUpload;
 import com.project.toyproject.board.infrastructure.BoardRepository;
 import com.project.toyproject.config.CustomDataJpaTest;
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +15,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 

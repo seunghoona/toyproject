@@ -72,6 +72,7 @@ querydsl {
 }
 
 sourceSets {
+
     main {
         java {
             srcDirs = ['src/main/java', querydslDir]
@@ -83,7 +84,8 @@ configurations {
     querydsl.extendsFrom compileClasspath
 }
 
-compileQuerydsl{
+compileQuerydsl {
+    doFirst { if (file(querydslDir).exists()) delete(file(querydslDir)) }
     options.annotationProcessorPath = configurations.querydsl
 }
 project.afterEvaluate {
@@ -93,3 +95,5 @@ project.afterEvaluate {
                     ',lombok.launch.AnnotationProcessorHider$AnnotationProcessor'
     ]
 }
+
+

@@ -3,28 +3,33 @@ package com.project.toyproject.jpqlExample;
 import com.project.toyproject.board.domain.*;
 import com.project.toyproject.board.dto.BoardCreateDTO;
 import com.project.toyproject.config.CustomDataJpaTest;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.SetPath;
+import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
+import org.springframework.test.annotation.Commit;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.project.toyproject.board.domain.QBoardCreate.boardCreate;
 import static com.project.toyproject.board.domain.QOptionUpload.optionUpload;
 import static com.project.toyproject.board.domain.QOptions.options;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @CustomDataJpaTest
@@ -36,6 +41,7 @@ public class QueryDSLExample {
 
     @PersistenceContext
     EntityManager entityManager;
+
 
     @Test
     @DisplayName("페이징하는 방법 ")
@@ -105,7 +111,7 @@ public class QueryDSLExample {
                 .limit(2)
                 .fetchResults();
 
-        Assertions.assertThat(boardCreateQueryResults.getTotal()).isEqualTo(3);
+        assertThat(boardCreateQueryResults.getTotal()).isEqualTo(3);
     }
 
     @Test
@@ -196,11 +202,11 @@ public class QueryDSLExample {
                 .on(boardCreate.boardName.eq("동영상게시판")).fetch();
 
     }
-    
+
     @Test
     //https://jojoldu.tistory.com/523
     //https://velog.io/@recordsbeat/Enum%EA%B3%BC-Function%EC%9D%84-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-QueryDSL-Keyword%EA%B2%80%EC%83%89-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0
-    public void findDtoBySetter() throws Exception{
+    public void findDtoBySetter() throws Exception {
         extracted();
 
         List<BoardCreateDTO> fetch = queryFactory
@@ -213,29 +219,147 @@ public class QueryDSLExample {
                 .from(boardCreate)
                 .fetch();
 
-        fetch.stream().forEach(s->{
+        fetch.stream().forEach(s -> {
             System.out.println("[DATA]=>" + s.toString());
         });
     }
 
 
-
     @Test
-    public void subQuery() throws Exception{
+    @DisplayName("서브쿼리 사용법 ")
+    public void subQuery() throws Exception {
 
         extracted();
 
         List<BoardCreateDTO> fetch = queryFactory
                 .select(
                         Projections.fields(BoardCreateDTO.class,
-                        boardCreate.boardName.as("name"),
-                        boardCreate.id.as("boardId"))
+                                boardCreate.boardName.as("name"),
+                                boardCreate.id.as("boardId"),
+                                ExpressionUtils.as(JPAExpressions
+                                        .select(options.count().intValue())
+                                        .from(options)
+                                ,"count")
                         )
+                )
                 .from(boardCreate)
                 .fetch();
 
         System.out.println(fetch.toString());
     }
+
+    
+    @Test
+    @DisplayName("동적쿼리사용방법")
+    public void dynamicQuery_booleanBuilder() throws Exception{
+        extracted();
+
+        String boardNameParameter = "동영상게시판";
+        Long max = 20L;
+
+        List<BoardCreate> boardCreates = searchBoardCreate1(boardNameParameter, max);
+
+
+        assertThat(boardCreates.size()).isEqualTo(1);
+    }
+
+    private List<BoardCreate> searchBoardCreate1(String boardNameParameter, Long max) {
+
+
+        BooleanBuilder builder = new BooleanBuilder();
+        if(!boardNameParameter.isBlank()){
+            builder.and(boardCreate.boardName.eq(boardNameParameter));
+        }
+        
+        if(max != null){
+            builder.and(optionUpload.file.max.eq(max));
+        }
+
+
+        return queryFactory
+                .select(boardCreate)
+                .from(boardCreate)
+                .innerJoin(boardCreate.options,optionUpload._super)
+                .where(builder)
+                .fetch();
+
+    }
+
+    @Test
+    public void dynamicQuery_boolenPrecate(){
+        extracted();
+        String boardNameParameter = null;
+        Long max = 20L;
+        /*queryFactory
+                .select(boardCreate,optionUpload)
+                .from(boardCreate)
+                .innerJoin(boardCreate.options,optionUpload._super)
+                .fetch();*/
+
+        queryFactory
+                .select(boardCreate)
+                .from(boardCreate)
+                .innerJoin(boardCreate.options,optionUpload._super)
+                .where(allCond(boardNameParameter,max))
+                .fetch();
+
+        /*
+            List<BoardCreate> resultList = entityManager.createQuery(
+                    "SELECT boardCreate " +
+                            "FROM BoardCreate boardCreate " +
+                            "JOIN Options options " +
+                            "ON boardCreate.id = options.id", BoardCreate.class).getResultList();
+        */
+
+    }
+
+    private BooleanBuilder boardCreateEq(String boardName) {
+        return  nullSafeBuilder(()-> boardCreate.boardName.eq(boardName));
+    }
+    private BooleanBuilder fileMaxSizeEq(Long max) {
+        return  nullSafeBuilder(()->optionUpload.file.max.eq(max));
+    }
+
+    private BooleanBuilder allCond(String boardName , Long max){
+        return boardCreateEq(boardName).and(fileMaxSizeEq(max));
+    }
+
+    private BooleanBuilder nullSafeBuilder(Supplier<BooleanExpression> f){
+        try{
+            return new BooleanBuilder(f.get());
+        }catch (IllegalArgumentException e ){
+            return new BooleanBuilder();
+        }
+    }
+
+
+
+    @Test
+    @DisplayName("벌크 수정삭제 배치 쿼리 작성")
+    @Commit
+    public void bulkUpdate() throws Exception{
+        extracted();
+
+        queryFactory
+                .update(boardCreate)
+                .set(boardCreate.boardName, "친구게시판")
+                .where(boardCreate.boardName.eq("동영상게시판"))
+                .execute();
+
+        entityManager.flush();
+        entityManager.clear();
+
+        List<BoardCreate> friend = queryFactory
+                .select(boardCreate)
+                .from(boardCreate)
+                .fetch();
+                /*.where(boardCreate.boardName.eq("친구게시판")).fetch();*/
+
+
+        assertThat(friend).extracting("boardName").contains("친구게시판");
+
+    }
+
 
     private void extracted() {
         BoardCreate movieboard = BoardCreate.builder()
@@ -259,5 +383,4 @@ public class QueryDSLExample {
 
 
 }
-
 
